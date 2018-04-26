@@ -36,7 +36,9 @@ def filter(data, percent, average):
 # ------------------------------------------
 def my_main(dataset_dir, result_dir, percentage_f):
   inputRDD = spark.read.json(dataset_dir).rdd
+  inputRDD.cache()
   mapRDD = inputRDD.groupBy(lambda x: x["cuisine"]).map(lambda x : (x[0], parseData(list(x[1]))))
+  mapRDD.cache()
   average = float(inputRDD.count())/float(mapRDD.count())
   filterRDD =  mapRDD.filter(lambda x: filter(x[1], percentage_f, average))
   outputRDD = filterRDD.sortBy(lambda x: float(x[1][0])/float(x[1][2]))
