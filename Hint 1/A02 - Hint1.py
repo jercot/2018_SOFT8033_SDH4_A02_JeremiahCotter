@@ -11,6 +11,7 @@
 # --------------------------------------------------------
 
 import json
+from __future__ import division
 
 def parseData(inData):
   total = 0
@@ -23,10 +24,10 @@ def parseData(inData):
       score -= x[5]
       neg += 1
     total+=1
-  return (total, neg, score, float(score)/float(total))
+  return (total, neg, score, score/total)
 
 def filter(data, percent, average):
-  if 100*float(data[1])/float(data[0])<percent and data[0]>average:
+  if 100*data[1]/data[0]<percent and data[0]>average:
     return True;
   return False;
 
@@ -38,10 +39,11 @@ def my_main(dataset_dir, result_dir, percentage_f):
   inputRDD.cache()
   mapRDD = inputRDD.groupBy(lambda x: x["cuisine"]).map(lambda x: (x[0], parseData(list(x[1]))))
   mapRDD.cache()
-  average = float(inputRDD.count())/float(mapRDD.count())
+  average = inputRDD.count()/mapRDD.count()
   filterRDD =  mapRDD.filter(lambda x: filter(x[1], percentage_f, average))
-  outputRDD = filterRDD.sortBy(lambda x: x[1][3])
+  outputRDD = filterRDD.sortBy(lambda x: -x[1][3])
   outputRDD.saveAsTextFile(result_dir)
+  print(outputRDD.collect())
 
 # ---------------------------------------------------------------
 #           PYTHON EXECUTION
