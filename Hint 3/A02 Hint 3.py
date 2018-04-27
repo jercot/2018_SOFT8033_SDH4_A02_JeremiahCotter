@@ -53,8 +53,8 @@ def process(rdd):
 def my_model(ssc, monitoring_dir, result_dir, percentage_f, window_duration, sliding_duration):
     inputDStream = ssc.textFileStream(monitoring_dir).map(json.loads)
     windowDStream = inputDStream.window(window_duration * time_step_interval, sliding_duration * time_step_interval)
-    ouputDStream = windowDStream.transform(lambda rdd: process(rdd))
-    ouputDStream.saveAsTextFiles(result_dir)
+    outputDStream = windowDStream.transform(lambda rdd: process(rdd))
+    outputDStream.saveAsTextFiles(result_dir)
     
 
 # ------------------------------------------
