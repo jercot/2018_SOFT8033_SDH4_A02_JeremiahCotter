@@ -40,7 +40,7 @@ def my_main(dataset_dir, result_dir, percentage_f):
   mapRDD.cache()
   average = float(inputRDD.count())/float(mapRDD.count())
   filterRDD =  mapRDD.filter(lambda x: filter(x[1], percentage_f, average))
-  outputRDD = filterRDD.sortBy(lambda x: float(x[1][0])/float(x[1][2]))
+  outputRDD = filterRDD.sortBy(lambda x: x[1][3])
   outputRDD.saveAsTextFile(result_dir)
 
 # ---------------------------------------------------------------
