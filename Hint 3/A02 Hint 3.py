@@ -15,7 +15,6 @@ from pyspark.streaming import StreamingContext
 import json
 from __future__ import division
 
-
 def parseData(inData):
   total = 0
   neg = 0
@@ -54,6 +53,7 @@ def my_model(ssc, monitoring_dir, result_dir, percentage_f, window_duration, sli
     inputDStream = ssc.textFileStream(monitoring_dir).map(json.loads)
     windowDStream = inputDStream.window(window_duration * time_step_interval, sliding_duration * time_step_interval)
     outputDStream = windowDStream.transform(lambda rdd: process(rdd))
+    outputDStream.pprint(10)
     outputDStream.saveAsTextFiles(result_dir)
     
 
@@ -137,14 +137,18 @@ def streaming_simulation(source_dir, monitoring_dir, time_step_interval, verbose
     # 1. We get the names of the files on source_dir
     files = get_source_dir_file_names(source_dir, verbose)
 
+    start = time.time()
+    count = 0
     # 2. We simulate the dynamic arriving of such these files from source_dir to dataset_dir
     # (i.e, the files are moved one by one for each time period, simulating their generation).
     for file in files:
-        # 2.1. We copy the file from source_dir to dataset_dir
-        dbutils.fs.cp(source_dir + file, monitoring_dir + file, False)
+        count += 1
+        
+        # 2.1. We copy the file from source_dir to dataset_dir#
+        dbutils.fs.cp(source_dir + file, monitoring_dir + file)
 
         # 2.2. We wait the desired transfer_interval
-        time.sleep(time_step_interval)
+        time.sleep(start+(count*time_step_interval)-time.time())
 
 
 # ------------------------------------------
@@ -228,7 +232,7 @@ if __name__ == '__main__':
     dataset_micro_batches = 16
 
     # 3. We specify the time interval each of our micro-batches (files) appear for its processing.
-    time_step_interval = 10
+    time_step_interval = 3
 
     # 4. We specify the maximum amount of micro-batches that we want to allow before considering data
     # old and dumping it.
