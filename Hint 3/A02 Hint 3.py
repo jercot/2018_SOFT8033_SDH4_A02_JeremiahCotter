@@ -34,7 +34,7 @@ def filter(data, percent, average):
     return True;
   return False;
 
-  
+
 def process(rdd):
   rdd.cache()
   if rdd.count()>0:
