@@ -53,7 +53,6 @@ def my_model(ssc, monitoring_dir, result_dir, percentage_f, window_duration, sli
     inputDStream = ssc.textFileStream(monitoring_dir).map(json.loads)
     windowDStream = inputDStream.window(window_duration * time_step_interval, sliding_duration * time_step_interval)
     outputDStream = windowDStream.transform(lambda rdd: process(rdd))
-    outputDStream.pprint(10)
     outputDStream.saveAsTextFiles(result_dir)
     
 
