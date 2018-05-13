@@ -46,25 +46,15 @@ def process(rdd):
     outputRDD = filterRDD.sortBy(lambda x: -x[1][3])
     return outputRDD
 
-
+  
 # ------------------------------------------
 # FUNCTION my_model
 # ------------------------------------------
 def my_model(ssc, monitoring_dir, result_dir, percentage_f):
     inputDStream = ssc.textFileStream(monitoring_dir).map(json.loads)
     outputDStream = inputDStream.transform(lambda rdd: process(rdd))
-    outputDStream.pprint(10)
     outputDStream.saveAsTextFiles(result_dir)
-    #inputDStream.cache()
-    #mapDStream = inputDStream.transform(lambda rdd: rdd.groupBy(lambda x: x["cuisine"]).map(lambda x: (x[0], parseData(list(x[1])))))
-    #mapDStream.cache()
-    #count = [0, 0]
-    #inputDStream.foreachRDD(lambda x, y, c = count: total(x, y, c, 0))
-    #mapDStream.foreachRDD(lambda x, y, c = count: total(x, y, c, 1))
-    #filterDStream = mapDStream.transform(lambda rdd: rdd.filter(lambda x, c=count: filter(x[1], percentage_f, c[0]/37)))
-    #mapDStream.foreachRDD(lambda x: x.filter(lambda x, c=count: filterS(x[1], percentage_f, c[0]/37)))
-    #mapDStream.foreachRDD(lambda x: printS(x, count))
-    #outputDStream = filterDStream.transform(lambda rdd: rdd.sortBy(lambda x: x[1][3]))
+    outputDStream.pprint(10)
 
     
 # ------------------------------------------
@@ -141,18 +131,14 @@ def streaming_simulation(source_dir, monitoring_dir, time_step_interval, verbose
     # 1. We get the names of the files on source_dir
     files = get_source_dir_file_names(source_dir, verbose)
 
-    start = time.time()
-    count = 0
     # 2. We simulate the dynamic arriving of such these files from source_dir to dataset_dir
     # (i.e, the files are moved one by one for each time period, simulating their generation).
     for file in files:
-        count += 1
-        
-        # 2.1. We copy the file from source_dir to dataset_dir#
-        dbutils.fs.cp(source_dir + file, monitoring_dir + file)
+        # 2.1. We copy the file from source_dir to dataset_dir
+        dbutils.fs.cp(source_dir + file, monitoring_dir + file, False)
 
         # 2.2. We wait the desired transfer_interval
-        time.sleep(start+(count*time_step_interval)-time.time())
+        time.sleep(time_step_interval)
 
 
 # ------------------------------------------
