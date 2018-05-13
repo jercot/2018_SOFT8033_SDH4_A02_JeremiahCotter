@@ -18,13 +18,14 @@ def parseData(inData):
   neg = 0
   score = 0
   for x in inData:
-    if x[3]=="Positive":
-      score += x[5]
-    elif x[3]=="Negative":
-      score -= x[5]
+    if x["evaluation"]=="Positive":
+      score += x["points"]
+    elif x["evaluation"]=="Negative":
+      score -= x["points"]
       neg += 1
     total+=1
   return (total, neg, score, score/total)
+
 
 def filter(data, percent, average):
   if 100*data[1]/data[0]<percent and data[0]>average:
@@ -35,7 +36,7 @@ def filter(data, percent, average):
 # FUNCTION my_main
 # ------------------------------------------
 def my_main(dataset_dir, result_dir, percentage_f):
-  inputRDD = spark.read.json(dataset_dir).rdd
+  inputRDD = sc.textFile(dataset_dir).map(json.loads)
   inputRDD.cache()
   mapRDD = inputRDD.groupBy(lambda x: x["cuisine"]).map(lambda x: (x[0], parseData(list(x[1]))))
   mapRDD.cache()
@@ -43,7 +44,6 @@ def my_main(dataset_dir, result_dir, percentage_f):
   filterRDD =  mapRDD.filter(lambda x: filter(x[1], percentage_f, average))
   outputRDD = filterRDD.sortBy(lambda x: -x[1][3])
   outputRDD.saveAsTextFile(result_dir)
-  print(outputRDD.collect())
 
 # ---------------------------------------------------------------
 #           PYTHON EXECUTION
